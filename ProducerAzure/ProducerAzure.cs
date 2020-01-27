@@ -32,9 +32,14 @@ namespace ProducerAzure
             if (cfgName == null) {
                 return new BadRequestObjectResult("[ProducerAzure] Please specify a name in the config input!");
             }
-            string hostAddr = (string)jConfigData.GetValue("host_addr");
-            if (hostAddr == null) {
-                return new BadRequestObjectResult("[ProducerAzure] Please specify consumer host address in the config input!");
+            string configHostAddr = (string)jConfigData.GetValue("config_host_addr");
+            if (configHostAddr == null) {
+                return new BadRequestObjectResult("[ProducerAzure] Please specify consumer CONFIG endpoint in the config input!");
+            }
+            string dataHostAddr = (string)jConfigData.GetValue("data_host_addr");
+            if (dataHostAddr == null)
+            {
+                return new BadRequestObjectResult("[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
             }
             // TODO: Check null below!
             JObject producerCfg = (JObject)jConfigData.GetValue("producer_config");
@@ -42,29 +47,29 @@ namespace ProducerAzure
 
             // Send ConsumerConfig as JSON string
             string configUUID = Guid.NewGuid().ToString();
-            //HttpWebResponse configResponse = SendConsumerConfig(configUUID, consumerCfg.ToString(), hostAddr);
+            HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
 
             //// Display the status from consumer
             //Console.WriteLine(configResponse.StatusDescription);
 
-            //// Get the stream containing content returned by the server.  
-            //// The using block ensures the stream is automatically closed.
-            //using (Stream configDataStream = configResponse.GetResponseStream())
-            //{
-            //    // Open the stream using a StreamReader for easy access.  
-            //    StreamReader reader = new StreamReader(configDataStream);
-            //    // Read the content.  
-            //    string responseFromServer = reader.ReadToEnd();
-            //    // Display the content.  
-            //    Console.WriteLine(responseFromServer);
-            //}
-            //configResponse.Close();
+            // Get the stream containing content returned by the server.  
+            // The using block ensures the stream is automatically closed.
+            string responseFromServer = "Default Consumer Response";
+            using (Stream configDataStream = configResponse.GetResponseStream())
+            {
+                // Open the stream using a StreamReader for easy access.  
+                StreamReader reader = new StreamReader(configDataStream);
+                // Read the content.  
+                responseFromServer = reader.ReadToEnd();
+            }
+            configResponse.Close();
 
             // Producer generates data and send to consumer
-            Controller.ProduceAndSend(configUUID, producerCfg, hostAddr);
+            Controller.ProduceAndSend(configUUID, producerCfg, dataHostAddr);
 
-            return (cfgName != null & hostAddr != null)
-                ? (ActionResult)new OkObjectResult($"[ProducerAzure] Received config: {jConfigData.ToString()}")
+            return (cfgName != null & dataHostAddr != null & configHostAddr != null)
+                ? (ActionResult)new OkObjectResult($"[ProducerAzure] Received config: {jConfigData.ToString()}\n****************\n" +
+                $"Consumer response: {responseFromServer}")
                 : new BadRequestObjectResult("[ProducerAzure] Invalid configuration json!");
         }
     }

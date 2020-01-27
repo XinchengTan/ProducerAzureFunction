@@ -1,0 +1,54 @@
+{
+  "config_name": "MyConfigA",
+  "config_host_addr": "http://localhost:7071/api/ProducerAzure //Consumer config endpoint",
+  "data_host_addr": "http://localhost:7071/api/ProducerAzure // Consumer data endpoint",
+  "consumer_config": 
+  {
+      "field_attributes": [
+        {
+          "name": "Name",
+          "type": "string"
+        },
+        {
+          "name": "age",
+          "type": "int"
+        },
+        {
+            "name": "height",
+            "type": "double"
+        }
+      ]
+  },
+  "producer_config": 
+  {
+      "threads_count": 1,
+      "records_count": 10,
+      "error_rate": 0.1,
+      "dimension_attributes": 
+      [
+        {
+          "name": "Name",
+          "type": "string",
+          "distribution_params": {
+            "max_len": 12
+          }
+        },
+        {
+          "name": "age",
+          "type": "int",
+          "distribution_params": {
+            "mean": 50.0,
+            "std": 5.0
+          }
+        },
+        {
+          "name": "height",
+          "type": "double",
+          "distribution_params": {
+            "mean": 6.0,
+            "std": 2.1
+          }
+        }
+      ]
+  }
+}
