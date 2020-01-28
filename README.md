@@ -8,7 +8,7 @@ As an Azure Function, the main program is triggered by any HTTP request with a j
 
 ## Input Configuration
 The required configuration for this project:
-![alt text](https://github.com/XinchengTan/ProducerAzureFunction/blob/master/Misc/FullConfig_example.png)
+![alt text](https://github.com/XinchengTan/ProducerAzureFunction/blob/master/Misc/FullConfig_eg.png)
 
 
 ## Execution Instruction
