@@ -3,7 +3,7 @@ This project simulates a data record producer in a producer-consumer framework.
 It generates data record by user specification in an input configuration json string.
 For example, users can specify the format of the data records to generate (e.g. field name, data type, etc.) as well as other parameters, such as error rate and total records.
 
-As an Azure Function, the main program is triggered by any HTTP request with the config json as its request body. Once triggered, it parses the config json and send generated data to targeted consumer.
+As an Azure Function, the main program is triggered by any HTTP request with a json-formatted config in its request body. Once triggered, it parses the config json and send generated data to targeted consumer.
 
 
 ## Input Configuration
