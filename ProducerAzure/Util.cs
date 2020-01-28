@@ -34,25 +34,6 @@ namespace ProducerAzure
             return jConfig;
         }
 
-        // Takes in the whole config JSON file as a JObject and returns a list of Fields
-        //public static FullConfig Translate(JObject config)
-        //{
-        //    List<FieldAttributes> fields = new List<FieldAttributes>();
-        //    foreach (JObject fieldConfig in (JArray)config["dimension_attributes"])
-        //    {
-        //        string typeID = (string)fieldConfig["type"];
-        //        fields.Add(configToFieldsTranslator.CaseAt(typeID, fieldConfig));
-        //    }
-        //    FullConfig fullConfig = new FullConfig(
-        //        (int)config["threads_count"],
-        //        (int)config["records_count"],
-        //        (double)config["error_rate"],
-        //        fields
-        //        );
-
-        //    return fullConfig;
-        //}
-
         public static FullConfig? ParseConfig(JObject jConfig)
         {
             List<FieldAttributes> fields = new List<FieldAttributes>();
@@ -89,7 +70,6 @@ namespace ProducerAzure
         public static IFieldDataGenerator MakeFieldDataGenerator(FieldAttributes f)
         {
             return generatorFactory.CaseAt(f.typeID, f);
-
         }
 
 
