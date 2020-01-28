@@ -36,11 +36,11 @@ namespace ProducerAzure
         {
             FieldDataGeneratorFactory factory = new FieldDataGeneratorFactory();
             List<IFieldDataGenerator> gens = new List<IFieldDataGenerator>();
-            foreach (FieldAttributes field in fields)
-            {
-                gens.Add(factory.CaseAt(field.typeID, field));
-            }
-            //fields.ForEach(field => factory.CaseAt(field.typeID, field));
+            //foreach (FieldAttributes field in fields)
+            //{
+            //    gens.Add(factory.CaseAt(field.typeID, field));
+            //}
+            fields.ForEach(field => gens.Add(factory.CaseAt(field.typeID, field)));
             this.fieldDataGens = gens;
         }
 

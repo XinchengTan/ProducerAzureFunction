@@ -21,7 +21,7 @@ namespace ProducerAzure
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("ProducerAzure HTTP trigger function processing a request.");
+            log.LogInformation("ProducerAzure HTTP trigger function start to process a request...");
 
             // Get the content of the request (i.e. Configuration)
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -30,61 +30,67 @@ namespace ProducerAzure
             
             string cfgName = (string)jConfigData.GetValue("config_name");
             if (cfgName == null) {
-                return new BadRequestObjectResult("[ProducerAzure] Please specify a name in the config input!");
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Please specify a name in the config input!");
             }
             string configHostAddr = (string)jConfigData.GetValue("config_host_addr");
             if (configHostAddr == null) {
-                return new BadRequestObjectResult("[ProducerAzure] Please specify consumer CONFIG endpoint in the config input!");
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Please specify consumer CONFIG endpoint in the config input!");
             }
             string dataHostAddr = (string)jConfigData.GetValue("data_host_addr");
             if (dataHostAddr == null)
             {
-                return new BadRequestObjectResult("[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
             }
             
             // TODO: Check null & other exceptions below!
             JObject producerCfg = (JObject)jConfigData.GetValue("producer_config");
             JObject consumerCfg = (JObject)jConfigData.GetValue("consumer_config");
-            log.LogInformation($"Parsed configuration '{cfgName}'");
+            log.LogInformation($"[ProducerAzure] Parsed configuration '{cfgName}'");
 
             // Send ConsumerConfig as JSON string
             string configUUID = Guid.NewGuid().ToString();
-            // TODO: Try catch exception??
+            // TODO: Try catch exception?? Something is wrong with sending data to consumer...
             //HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
 
             //// Display the status from consumer
-            //Console.WriteLine(configResponse.StatusDescription);
+            //log.LogInformation(configResponse.StatusDescription);
 
             // Get the stream containing content returned by the server.  
             // The using block ensures the stream is automatically closed.
-            string responseFromServer = "Default Consumer Response";
+            string responseFromServer = "[ProducerAzure] Default Consumer Response";
             //using (Stream configDataStream = configResponse.GetResponseStream())
             //{
             //    // Open the stream using a StreamReader for easy access.  
             //    StreamReader reader = new StreamReader(configDataStream);
             //    // Read the content.  
             //    responseFromServer = reader.ReadToEnd();
+            //    log.LogInformation(responseFromServer);
             //}
             //configResponse.Close();
 
+            log.LogInformation("[ProducerAzure] Start to generate data and send to consumer...");
+
             // Producer generates data and send to consumer
-            Controller.ProduceAndSend(configUUID, producerCfg, dataHostAddr);
+            Controller.ProduceAndSend(configUUID, producerCfg, dataHostAddr, log);
 
             return (cfgName != null & dataHostAddr != null & configHostAddr != null)
                 ? (ActionResult)new OkObjectResult(
                     $"[ProducerAzure] Received config: {jConfigData.ToString()}\n****************\n" +
                     $"Consumer response: {responseFromServer}")
                 : new BadRequestObjectResult(
-                    $"[ProducerAzure] Error! Consumer Response: {responseFromServer}"
-                    );
+                    $"[ProducerAzure] Error! Consumer Response: {responseFromServer}");
         }
     }
+
 
     public class Controller
     {
         private static string LOCAL_HOST = "http://localhost:7071/api/ProducerAzure";
 
-        public static void ProduceAndSend(string configUUID, JObject jProducerConfig, string host_addr)
+        public static void ProduceAndSend(string configUUID, JObject jProducerConfig, string host_addr, ILogger log)
         {
             FullConfig parsed_config = Parser.Translate(jProducerConfig);
             Producer producer = new Producer(parsed_config.records_count, parsed_config.fields);
@@ -95,11 +101,11 @@ namespace ProducerAzure
             {
                 try
                 {
-                    producer.SendAllRecords(new ProducerToDefaultConsumerAddpt(), configUUID, host_addr);
+                    producer.SendAllRecords(new ProducerToDefaultConsumerAddpt(), configUUID, host_addr, log);
                 }
                 catch (WebException webExcp)
                 {
-                    Console.WriteLine($"Got WebException while sending {counter}th record!");
+                    log.LogInformation($"[ERROR] Got WebException while sending {counter}th record!");
                 }
             };
 
