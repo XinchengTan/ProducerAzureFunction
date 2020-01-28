@@ -21,7 +21,7 @@ namespace ProducerAzure
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("ProducerAzure HTTP trigger function processed a request.");
+            log.LogInformation("ProducerAzure HTTP trigger function processing a request.");
 
             // Get the content of the request (i.e. Configuration)
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -41,13 +41,16 @@ namespace ProducerAzure
             {
                 return new BadRequestObjectResult("[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
             }
-            // TODO: Check null below!
+            
+            // TODO: Check null & other exceptions below!
             JObject producerCfg = (JObject)jConfigData.GetValue("producer_config");
             JObject consumerCfg = (JObject)jConfigData.GetValue("consumer_config");
+            log.LogInformation($"Parsed configuration '{cfgName}'");
 
             // Send ConsumerConfig as JSON string
             string configUUID = Guid.NewGuid().ToString();
-            HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
+            // TODO: Try catch exception??
+            //HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
 
             //// Display the status from consumer
             //Console.WriteLine(configResponse.StatusDescription);
@@ -55,22 +58,25 @@ namespace ProducerAzure
             // Get the stream containing content returned by the server.  
             // The using block ensures the stream is automatically closed.
             string responseFromServer = "Default Consumer Response";
-            using (Stream configDataStream = configResponse.GetResponseStream())
-            {
-                // Open the stream using a StreamReader for easy access.  
-                StreamReader reader = new StreamReader(configDataStream);
-                // Read the content.  
-                responseFromServer = reader.ReadToEnd();
-            }
-            configResponse.Close();
+            //using (Stream configDataStream = configResponse.GetResponseStream())
+            //{
+            //    // Open the stream using a StreamReader for easy access.  
+            //    StreamReader reader = new StreamReader(configDataStream);
+            //    // Read the content.  
+            //    responseFromServer = reader.ReadToEnd();
+            //}
+            //configResponse.Close();
 
             // Producer generates data and send to consumer
             Controller.ProduceAndSend(configUUID, producerCfg, dataHostAddr);
 
             return (cfgName != null & dataHostAddr != null & configHostAddr != null)
-                ? (ActionResult)new OkObjectResult($"[ProducerAzure] Received config: {jConfigData.ToString()}\n****************\n" +
-                $"Consumer response: {responseFromServer}")
-                : new BadRequestObjectResult("[ProducerAzure] Invalid configuration json!");
+                ? (ActionResult)new OkObjectResult(
+                    $"[ProducerAzure] Received config: {jConfigData.ToString()}\n****************\n" +
+                    $"Consumer response: {responseFromServer}")
+                : new BadRequestObjectResult(
+                    $"[ProducerAzure] Error! Consumer Response: {responseFromServer}"
+                    );
         }
     }
 
