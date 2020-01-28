@@ -35,12 +35,12 @@ namespace ProducerAzure
                 return new BadRequestObjectResult(
                     "[ProducerAzure] Please specify a name in the config input!");
             }
-            string configHostAddr = (string)jConfigData.GetValue("config_host_addr");
+            string configHostAddr = (string)jConfigData.GetValue("config_url");
             if (configHostAddr == null) {
                 return new BadRequestObjectResult(
                     "[ProducerAzure] Please specify consumer CONFIG endpoint in the config input!");
             }
-            string dataHostAddr = (string)jConfigData.GetValue("data_host_addr");
+            string dataHostAddr = (string)jConfigData.GetValue("data_url");
             if (dataHostAddr == null)
             {
                 return new BadRequestObjectResult(
