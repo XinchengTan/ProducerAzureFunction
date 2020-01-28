@@ -21,9 +21,10 @@ It accepts config JSON sent as an HTTP request and echos the config in the respo
 
 ### Run Locally
 1. Clone this project to a local director
-2. Install Postman
-3. Run ProducerAzure, and copy the localhost IP address shown on Terminal
+2. Open ProducerAzure.sln and run ProducerAzure.cs, and copy the localhost IP address shown on Terminal
+3. Install Postman
 4. Create an HTTP POST request in Postman
    -- In Request header, add "Content-Type" as KEY and "application/json" as VALUE
    -- Request body is the json-formatted configuration
+   -- Paste the locahost address into request URL
 5. Click Send on Postman and you can monitor the program on Terminal
