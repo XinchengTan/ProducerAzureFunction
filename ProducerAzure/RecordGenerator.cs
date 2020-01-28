@@ -15,10 +15,11 @@ namespace ProducerAzure
 
         public RecordGeneratorWithError(List<FieldAttributes> fields)
         {
-            this.gen = new AdditionalFieldErrorGenerator
-                (new MissingFieldErrorGenerator(
-                    new WrongTypeErrorGenerator(
-                        new RecordGenerator(fields))));
+            this.gen = new NullErrorGenerator(
+                new AdditionalFieldErrorGenerator(
+                    new MissingFieldErrorGenerator(
+                        new WrongTypeErrorGenerator(
+                            new RecordGenerator(fields)))));
         }
 
         public JObject GenerateRecord()
@@ -34,13 +35,11 @@ namespace ProducerAzure
 
         public RecordGenerator(List<FieldAttributes> fields)
         {
-            FieldDataGeneratorFactory factory = new FieldDataGeneratorFactory();
             List<IFieldDataGenerator> gens = new List<IFieldDataGenerator>();
-            //foreach (FieldAttributes field in fields)
-            //{
-            //    gens.Add(factory.CaseAt(field.typeID, field));
-            //}
-            fields.ForEach(field => gens.Add(factory.CaseAt(field.typeID, field)));
+            foreach (FieldAttributes field in fields)
+            {
+                gens.Add(Util.MakeFieldDataGenerator(field));
+            }
             this.fieldDataGens = gens;
         }
 
@@ -51,10 +50,9 @@ namespace ProducerAzure
             foreach (IFieldDataGenerator gen in fieldDataGens)
             {
                 string field_name = gen.GetFieldName();
-                record[field_name] = gen.GenerateFieldData();
+                record.Add(field_name, gen.GenerateFieldData());
                 //Console.WriteLine($"Field_name: {field_name}, value: {record[field_name]}");
             }
-            //fieldDataGens.ForEach(generator => record[generator.GetFieldName()] = generator.GenerateFieldData());
 
             return record;
         }
@@ -81,10 +79,15 @@ namespace ProducerAzure
         public JObject GenerateRecord()
         {
             JObject rec = Generator.GenerateRecord();
-            //Console.WriteLine($"[AErrorGenerator] Record: {rec.ToString()}");
-            return random.NextDouble() < this.ErrorRate ?
-                ApplyError(rec) :
-                rec;
+            //Console.WriteLine($"Record: {rec.ToString()}");
+            if (random.NextDouble() < this.ErrorRate)
+            {
+                return ApplyError(rec);
+            }
+            else
+            {
+                return rec;
+            }
         }
 
         protected abstract JObject ApplyError(JObject record);
@@ -108,17 +111,14 @@ namespace ProducerAzure
 
         protected override JObject ApplyError(JObject record)
         {
-            // TODO: Debug me! property is null
-            //JProperty property = record.Properties().GetEnumerator().Current;
-            //string name = property.Name;
-            //JTokenType valueType = property.Value.Type;
-            //if (valueType == JTokenType.String)
-            //{
-            //    record.Add(name, new JValue(0));
-            //} else
-            //{
-            //    record.Add(name, new JValue("wrong type data"));
-            //}
+            var e = record.Properties().GetEnumerator();
+            if (e.MoveNext())
+            {
+                JProperty property = e.Current;
+                JValue newValue = property.Value.Type == JTokenType.String ? new JValue(0) : new JValue("wrong type data");
+                record[property.Name] = newValue;
+            }
+
             return record;
 
         }
@@ -135,6 +135,24 @@ namespace ProducerAzure
         }
     }
 
+    public class NullErrorGenerator : AErrorGenerator
+    {
+        public NullErrorGenerator(IRecordGenerator gen) : base(gen) { }
+
+        protected override JObject ApplyError(JObject record)
+        {
+            var e = record.Properties().GetEnumerator();
+            if (e.MoveNext())
+            {
+                JProperty property = e.Current;
+                record.Remove(property.Name);
+                record[property.Name] = null;
+            }
+
+            return record;
+        }
+    }
+
     public class MissingFieldErrorGenerator : AErrorGenerator
     {
 
@@ -142,9 +160,13 @@ namespace ProducerAzure
 
         protected override JObject ApplyError(JObject record)
         {
-            // TODO: Fix me -- Seems the property here is null?
-            //JProperty property = record.Properties().GetEnumerator().Current;
-            //record.Remove(property.Name);
+            var e = record.Properties().GetEnumerator();
+            if (e.MoveNext())
+            {
+                JProperty property = e.Current;
+                record.Remove(property.Name);
+            }
+
             return record;
         }
     }

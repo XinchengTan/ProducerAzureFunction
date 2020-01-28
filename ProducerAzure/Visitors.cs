@@ -25,7 +25,7 @@ namespace ProducerAzure
         }
     }
 
-    public class FieldDataGeneratorFactory: AVisitor<FieldAttributes, IFieldDataGenerator>
+    public class FieldDataGeneratorFactory : AVisitor<FieldAttributes, IFieldDataGenerator>
     {
         public FieldDataGeneratorFactory()
         {
@@ -36,46 +36,47 @@ namespace ProducerAzure
     }
 
 
-    public class ConfigToFieldsTranslator: AVisitor<JObject, FieldAttributes>
+    public class ConfigToFieldsTranslator : AVisitor<JObject, FieldAttributes>
     {
 
         public ConfigToFieldsTranslator()
         {
             this.AddCase(Type.Double, jObject => {
-                string name = (string) jObject["name"];
-                double mean = (double) jObject["distribution_params"]["mean"];
-                double std = (double) jObject["distribution_params"]["std"];
+
+                string name = (string)jObject["name"];
+                double? mean = Util.GetValueOrNull<double>(jObject["distribution_params"]["mean"]);
+                double? std = Util.GetValueOrNull<double>(jObject["distribution_params"]["std"]);
                 FieldParam param = new FieldParam
                 {
                     mean = mean,
                     standard_deviation = std
                 };
-                return new FieldAttributes(name, "double", param);
+                return new FieldAttributes(name, Type.Double, param);
             });
 
             this.AddCase(Type.Integer, jObject => {
-                string name = (string) jObject["name"];
-                double mean = (double) jObject["distribution_params"]["mean"];
-                double std = (double) jObject["distribution_params"]["std"];
+
+                string name = (string)jObject["name"];
+                double? mean = Util.GetValueOrNull<double>(jObject["distribution_params"]["mean"]);
+                double? std = Util.GetValueOrNull<double>(jObject["distribution_params"]["std"]);
                 FieldParam param = new FieldParam
                 {
                     mean = mean,
                     standard_deviation = std
                 };
-                return new FieldAttributes(name, "int", param);
+                return new FieldAttributes(name, Type.Integer, param);
             });
 
             this.AddCase(Type.String, jObject => {
-                string name = (string) jObject["name"];
-                int maxlen = (int) jObject["distribution_params"]["max_len"];
+
+                string name = (string)jObject["name"];
+                int? maxlen = Util.GetValueOrNull<int>(jObject["distribution_params"]["max_len"]);
                 FieldParam param = new FieldParam
                 {
                     max_len = maxlen
                 };
-                return new FieldAttributes(name, "string", param);
+                return new FieldAttributes(name, Type.String, param);
             });
         }
-
-        
     }
 }

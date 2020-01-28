@@ -23,11 +23,13 @@ namespace ProducerAzure
         {
             log.LogInformation("ProducerAzure HTTP trigger function start to process a request...");
 
-            // Get the content of the request (i.e. Configuration)
+            // Get Configuration json
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic httpData = JsonConvert.DeserializeObject(requestBody);
             JObject jConfigData = (JObject)httpData;
-            
+
+
+            // Parse Configuration json
             string cfgName = (string)jConfigData.GetValue("config_name");
             if (cfgName == null) {
                 return new BadRequestObjectResult(
@@ -44,11 +46,21 @@ namespace ProducerAzure
                 return new BadRequestObjectResult(
                     "[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
             }
-            
-            // TODO: Check null & other exceptions below!
-            JObject producerCfg = (JObject)jConfigData.GetValue("producer_config");
             JObject consumerCfg = (JObject)jConfigData.GetValue("consumer_config");
-            log.LogInformation($"[ProducerAzure] Parsed configuration '{cfgName}'");
+            if (consumerCfg == null)
+            {
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Consumer config cannot be null!");
+            }
+            JObject producerCfg = (JObject)jConfigData.GetValue("producer_config");
+            FullConfig? parsedProducerCfg = Util.ParseConfig(producerCfg);
+            if (parsedProducerCfg == null)
+            {
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Incorrect Producer config format!");
+            }
+            log.LogInformation($"[ProducerAzure] Successfully parsed configuration: {cfgName}");
+
 
             // Send ConsumerConfig as JSON string
             string configUUID = Guid.NewGuid().ToString();
@@ -58,6 +70,7 @@ namespace ProducerAzure
             //// Display the status from consumer
             //log.LogInformation(configResponse.StatusDescription);
 
+            // TODO: Delete the following since WebRequest is synchronous
             // Get the stream containing content returned by the server.  
             // The using block ensures the stream is automatically closed.
             string responseFromServer = "[ProducerAzure] Default Consumer Response";
@@ -71,10 +84,10 @@ namespace ProducerAzure
             //}
             //configResponse.Close();
 
-            log.LogInformation("[ProducerAzure] Start to generate data and send to consumer...");
 
             // Producer generates data and send to consumer
-            Controller.ProduceAndSend(configUUID, producerCfg, dataHostAddr, log);
+            log.LogInformation("[ProducerAzure] Start to generate data and send to consumer...");
+            Controller.ProduceAndSend(configUUID, parsedProducerCfg.Value, dataHostAddr, log);
 
             return (cfgName != null & dataHostAddr != null & configHostAddr != null)
                 ? (ActionResult)new OkObjectResult(
@@ -90,25 +103,25 @@ namespace ProducerAzure
     {
         private static string LOCAL_HOST = "http://localhost:7071/api/ProducerAzure";
 
-        public static void ProduceAndSend(string configUUID, JObject jProducerConfig, string host_addr, ILogger log)
+        public static void ProduceAndSend(string configUUID, FullConfig producerConfig, string host_addr, ILogger log)
         {
-            FullConfig parsed_config = Parser.Translate(jProducerConfig);
-            Producer producer = new Producer(parsed_config.records_count, parsed_config.fields);
+            Producer producer = new Producer(producerConfig.records_count, producerConfig.fields);
 
             // Generate and Send Data Records
             host_addr = host_addr ?? LOCAL_HOST;
-            for (int counter = parsed_config.records_count; counter > 0; counter--)
+            ProducerToDefaultConsumerAddpt adapter = new ProducerToDefaultConsumerAddpt();
+            for (int counter = producerConfig.records_count; counter > 0; counter--)
             {
                 try
                 {
-                    producer.SendAllRecords(new ProducerToDefaultConsumerAddpt(), configUUID, host_addr, log);
+                    producer.SendRecord(adapter, configUUID, host_addr, log);
                 }
                 catch (WebException webExcp)
                 {
-                    log.LogInformation($"[ERROR] Got WebException while sending {counter}th record!");
+                    // TODO: Log error here?
+                    log.LogInformation($"[ERROR] Got WebException while sending {counter}th record!");   
                 }
             };
-
         }
 
 
