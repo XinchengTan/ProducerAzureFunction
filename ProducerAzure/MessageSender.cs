@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using TestInstrumentation;
 using System.Text;
@@ -29,8 +28,7 @@ namespace ProducerAzure
                 }
                 catch (WebException webExcp)
                 {
-                    // TODO: Log error here?
-                    log.RawLog(LogLevel.ERROR, $"[ERROR] Got WebException while sending {counter}th record!");
+                    log.RawLog(LogLevel.ERROR, $"[ERROR] Got WebException {webExcp} while sending {counter}th record!");
                 }
             };
         }
@@ -98,8 +96,6 @@ namespace ProducerAzure
             configDataStream.Close();
 
             // Get the response.  
-            //HttpWebResponse consumerResponse = (HttpWebResponse)configRequest.GetResponse();
-            // Get the response
             string consumerResponse = "[SendConsumerConfig] Default Consumer Response";
             try
             {

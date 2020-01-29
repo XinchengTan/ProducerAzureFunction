@@ -19,13 +19,13 @@ namespace ProducerAzure
     {
         static CustomLogger customLog = new CustomLogger("Producer_TeamA");
 
-        // TODO: 3. Add "How to run" instruction on documentation!
-        // TODO: 4. Analysis?
+        // TODO: 1. Add adapter
+        // TODO: 2. Add "How to run" instruction on documentation!
+        // TODO: 3. Analysis?
 
         [FunctionName("ProducerAzure")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
-            ILogger log)
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
         {
             customLog.RawLog(LogLevel.INFO, "ProducerAzure HTTP trigger function start to process a request...");
 
@@ -109,9 +109,5 @@ namespace ProducerAzure
                     $"[ProducerAzure] Got exception during data transfer!");
         }
     }
-
-
-
-
 
 }

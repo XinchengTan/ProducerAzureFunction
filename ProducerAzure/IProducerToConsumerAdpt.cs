@@ -18,7 +18,6 @@ namespace ProducerAzure
 
         public void Send(JToken record, string configUUID, string host_addr)
         {
-
             {
                 try
                 {
@@ -86,8 +85,8 @@ namespace ProducerAzure
                     // Get the WebException status code.  
                     WebExceptionStatus status = webExcp.Status;
                     // If status is WebExceptionStatus.ProtocolError,   
-                    //   there has been a protocol error and a WebResponse   
-                    //   should exist. Display the protocol error.  
+                    // there has been a protocol error and a WebResponse   
+                    // should exist. Display the protocol error.  
                     if (status == WebExceptionStatus.ProtocolError)
                     {
                         Console.Write("The server returned protocol error ");
