@@ -3,6 +3,13 @@ using System.Collections.Generic;
 
 namespace ProducerAzure
 {
+    public struct ErrorRateConfig
+    {
+        public double? badValue;
+        public double? missingField;
+        public double? additionalField;
+
+    }
     // Same as DimentionAttribute
     public struct FieldAttributes
     {
@@ -32,14 +39,14 @@ namespace ProducerAzure
     {
         public int threads_count { get; }
         public int records_count { get; }
-        public double error_rate { get; }
+        public ErrorRateConfig error_rate { get; }
         public List<FieldAttributes> fields;
 
-        public FullConfig(int threads, int records, double err_rate, List<FieldAttributes> fields)
+        public FullConfig(int threads, int records, ErrorRateConfig errorRate, List<FieldAttributes> fields)
         {
             this.threads_count = threads;
             this.records_count = records;
-            this.error_rate = err_rate;
+            this.error_rate = errorRate;
             this.fields = fields;
         }
     } 
