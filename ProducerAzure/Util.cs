@@ -11,28 +11,10 @@ namespace ProducerAzure
 {
     class Util {
         //private static readonly string LOCAL_FILEPATH = "/Users/shenhongyu/Desktop/producerConfig.json";
-        private static string LOCAL_FILEPATH = "/Users/caratan/Desktop/COMP410/producerConfig.json";
 
         private static readonly ConfigToFieldsTranslator configToFieldsTranslator = new ConfigToFieldsTranslator();
         private static readonly FieldDataGeneratorFactory generatorFactory = new FieldDataGeneratorFactory();
 
-
-        private static JObject LoadConfig(string? filePath)
-        {
-            Console.WriteLine($"Echoing input file path: {filePath}");
-
-            if (String.IsNullOrEmpty(filePath))
-            {
-                // TODO: Throw exception
-                Console.WriteLine("Got empty file path! Start trying default path...");
-                filePath = LOCAL_FILEPATH;
-            }
-
-            using StreamReader stream = File.OpenText(filePath);
-            using JsonTextReader reader = new JsonTextReader(stream);
-            JObject jConfig = (JObject)JToken.ReadFrom(reader);
-            return jConfig;
-        }
 
         public static FullConfig? ParseConfig(JObject jConfig)
         {
@@ -64,6 +46,19 @@ namespace ProducerAzure
                 return null;
             }
 
+        }
+
+        public static string FormatProducerResult(string uuid, string configName, string jConfig, string? analysis) {
+            if (analysis != null)
+            {
+                return $"[ProducerAzure] Received config '{configName}' - GUID '{uuid}':\n" +
+                       $"{jConfig}\n****************************************************\n" +
+                       $"Consumer analysis: {analysis}";
+            } else
+            {
+                return $"[ProducerAzure] Received config '{configName}' - GUID '{uuid}':\n" +
+                       $"{jConfig}\n****************************************************\n";
+            }
         }
 
 

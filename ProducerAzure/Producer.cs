@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
+using TestInstrumentation;
 
 namespace ProducerAzure
 {
@@ -22,16 +23,16 @@ namespace ProducerAzure
         }
 
         // Sends one data record
-        public void SendRecord(IProducerToConsumerAdpt adpt, string uuid, string receiver_addr, ILogger log)
+        public void SendRecord(IProducerToConsumerAdpt adpt, string uuid, string receiver_addr, CustomLogger log)
         {
             JObject record = recordGenerator.GenerateRecord();
-            log.LogInformation($"[Producer] Generated Data Record: {record}");
+            log.RawLog(LogLevel.INFO, $"[Producer] Generated Data Record: {record}");
             adpt.Send(record, uuid, receiver_addr); //TODO: Uncomment me to test connection with consumer!
             this.Amount --;
         }
 
         // Sends all data records required
-        public void SendAllRecords(IProducerToConsumerAdpt adpt, string uuid, string receiver_addr, ILogger log)
+        public void SendAllRecords(IProducerToConsumerAdpt adpt, string uuid, string receiver_addr, CustomLogger log)
         {
             while(this.Amount != 0)
             {

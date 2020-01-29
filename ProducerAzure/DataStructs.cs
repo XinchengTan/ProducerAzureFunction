@@ -25,7 +25,6 @@ namespace ProducerAzure
         public int? max_len;
 
         // TODO: add all possible args
-
     }
 
 
@@ -43,6 +42,6 @@ namespace ProducerAzure
             this.error_rate = err_rate;
             this.fields = fields;
         }
-    }
+    } 
 
 }
