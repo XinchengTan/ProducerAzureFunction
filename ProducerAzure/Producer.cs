@@ -26,7 +26,7 @@ namespace ProducerAzure
         {
             JObject record = recordGenerator.GenerateRecord();
             log.LogInformation($"[Producer] Generated Data Record: {record}");
-            //adpt.Send(record, uuid, receiver_addr); //TODO: Uncomment me to test connection with consumer!
+            adpt.Send(record, uuid, receiver_addr); //TODO: Uncomment me to test connection with consumer!
             this.Amount --;
         }
 

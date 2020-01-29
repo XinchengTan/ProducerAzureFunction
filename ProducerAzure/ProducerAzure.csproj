@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
     <PackageReference Include="NumSharp" Version="0.20.5" />
+    <PackageReference Include="TestInstrumentation" Version="1.0.11" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\host.json" />
@@ -82,6 +83,51 @@
     <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\ProducerAzure.pdb" />
     <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\ProducerAzure\function.json" />
     <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\extensions.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\ProducerAzure\function.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\extensions.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.DependencyInjection.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.DependencyModel.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.FileProviders.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.FileProviders.Physical.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Hosting.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Logging.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Logging.Abstractions.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Hosting.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.FileSystemGlobbing.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.ObjectPool.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Logging.Configuration.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Options.ConfigurationExtensions.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Options.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Primitives.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Net.Http.Headers.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.WindowsAzure.Storage.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\NCrontab.Signed.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Newtonsoft.Json.Bson.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Newtonsoft.Json.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\NumSharp.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\ProducerAzure.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Runtime.CompilerServices.Unsafe.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Text.Encodings.Web.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Net.Http.Formatting.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\ProducerAzure.pdb" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\ProducerAzure\function.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\extensions.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.Extensions.Primitives.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Microsoft.WindowsAzure.Storage.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Newtonsoft.Json.Bson.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\NCrontab.Signed.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\Newtonsoft.Json.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\NumSharp.Core.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\ProducerAzure.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Net.Http.Formatting.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Runtime.CompilerServices.Unsafe.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\System.Text.Encodings.Web.dll" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\ProducerAzure.pdb" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\ProducerAzure\function.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\bin\extensions.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\ProducerAzure.deps.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\host.json" />
+    <None Remove="obj\Release\netcoreapp2.1\PubTmp\Out\host.json" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

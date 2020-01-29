@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using TestInstrumentation;
 using System.Text;
 
 
@@ -18,7 +19,7 @@ namespace ProducerAzure
     {
         [FunctionName("ProducerAzure")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("ProducerAzure HTTP trigger function start to process a request...");
@@ -46,6 +47,12 @@ namespace ProducerAzure
                 return new BadRequestObjectResult(
                     "[ProducerAzure] Please specify consumer DATA endpoint in the config input!");
             }
+            string analysisHostAddr = (string)jConfigData.GetValue("analysis_url");
+            if (dataHostAddr == null)
+            {
+                return new BadRequestObjectResult(
+                    "[ProducerAzure] Please specify consumer ANALYSIS endpoint in the config input!");
+            }
             JObject consumerCfg = (JObject)jConfigData.GetValue("consumer_config");
             if (consumerCfg == null)
             {
@@ -65,33 +72,48 @@ namespace ProducerAzure
             // Send ConsumerConfig as JSON string
             string configUUID = Guid.NewGuid().ToString();
             // TODO: Try catch exception?? Something is wrong with sending data to consumer...
-            //HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
+            HttpWebResponse configResponse = Controller.SendConsumerConfig(configUUID, consumerCfg.ToString(), configHostAddr);
 
             //// Display the status from consumer
-            //log.LogInformation(configResponse.StatusDescription);
+            log.LogInformation(configResponse.StatusDescription);
 
             // TODO: Delete the following since WebRequest is synchronous
             // Get the stream containing content returned by the server.  
             // The using block ensures the stream is automatically closed.
             string responseFromServer = "[ProducerAzure] Default Consumer Response";
-            //using (Stream configDataStream = configResponse.GetResponseStream())
-            //{
-            //    // Open the stream using a StreamReader for easy access.  
-            //    StreamReader reader = new StreamReader(configDataStream);
-            //    // Read the content.  
-            //    responseFromServer = reader.ReadToEnd();
-            //    log.LogInformation(responseFromServer);
-            //}
-            //configResponse.Close();
-
+            using (Stream configDataStream = configResponse.GetResponseStream())
+            {
+                // Open the stream using a StreamReader for easy access.  
+                StreamReader reader = new StreamReader(configDataStream);
+                // Read the content.  
+                responseFromServer = reader.ReadToEnd();
+                log.LogInformation(responseFromServer);
+            }
+            configResponse.Close();
 
             // Producer generates data and send to consumer
             log.LogInformation("[ProducerAzure] Start to generate data and send to consumer...");
             Controller.ProduceAndSend(configUUID, parsedProducerCfg.Value, dataHostAddr, log);
 
+
+            // Producer sends end signal
+            string analysisResponse = "[ProducerAzure] Default analysis response";
+            try
+            {
+                HttpWebResponse endResponse = Controller.SendEndSignal(configUUID, analysisHostAddr);
+                analysisResponse = endResponse.StatusDescription;
+                endResponse.Close();
+            }
+            catch (WebException) {
+                log.LogError("Got Web exception!");
+            }
+            log.LogInformation($"[ProducerAzure] End Signal Response: {analysisResponse}");
+
+
             return (cfgName != null & dataHostAddr != null & configHostAddr != null)
                 ? (ActionResult)new OkObjectResult(
-                    $"[ProducerAzure] Received config: {jConfigData.ToString()}\n****************\n" +
+                    $"[ProducerAzure] Received config GUID {configUUID}:\n" +
+                    $"{jConfigData.ToString()}\n****************\n" +
                     $"Consumer response: {responseFromServer}")
                 : new BadRequestObjectResult(
                     $"[ProducerAzure] Error! Consumer Response: {responseFromServer}");
@@ -122,6 +144,22 @@ namespace ProducerAzure
                     log.LogInformation($"[ERROR] Got WebException while sending {counter}th record!");   
                 }
             };
+        }
+
+        public static HttpWebResponse SendEndSignal(string configUUID, string host_addr)
+        {
+
+            // Create a request using a URL that can receive a post.
+            WebRequest analysisRequest = WebRequest.Create(host_addr);
+            analysisRequest.Method = "GET";
+
+            // Set the Config-GUID header
+            analysisRequest.Headers["Config-GUID"] = configUUID;
+
+            // Get the response.  
+            HttpWebResponse consumerResponse = (HttpWebResponse)analysisRequest.GetResponse();
+
+            return consumerResponse;
         }
 
 
