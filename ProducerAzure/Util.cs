@@ -30,7 +30,13 @@ namespace ProducerAzure
             {
                 int threads_count = (int)jConfig["threads_count"];
                 int records_count = (int)jConfig["records_count"] < 2147483647 ? (int)jConfig["records_count"] : 2147483647;
-                double error_rate = (double)jConfig["error_rate"];
+                ErrorRateConfig error_rate = new ErrorRateConfig
+                {
+                    missingField = (double)jConfig["error_rate"]["missing_field"],
+                    badValue = (double)jConfig["error_rate"]["bad_value"],
+                    additionalField = (double)jConfig["error_rate"]["additional_field"]
+
+                };
 
                 FullConfig fullConfig = new FullConfig(
                     threads_count,
@@ -67,18 +73,38 @@ namespace ProducerAzure
             return generatorFactory.CaseAt(f.typeID, f);
         }
 
-
-        public static T? GetValueOrNull<T>(Object obj) where T : struct
+        public static IRecordGenerator ApplyError(IRecordGenerator gen, ErrorRateConfig config)
         {
-            try
-            {
-                return (T) obj;
-            }
-            catch
-            {
-                //Console.WriteLine("Type casting error in Config file.");
-                return null;
-            }
+            IRecordGenerator gen1 = ApplyErrorHelper(config.badValue, "Bad value", gen);
+            IRecordGenerator gen2 = ApplyErrorHelper(config.missingField, "Missing field", gen1);
+            IRecordGenerator gen3 = ApplyErrorHelper(config.additionalField, "Additional field", gen2);
+
+            return gen3;
         }
+
+        private static IRecordGenerator ApplyErrorHelper(double? unprocessedRate, string errorType, IRecordGenerator gen)
+        {
+
+            double rate = unprocessedRate.GetValueOrDefault(0.0);
+            if (rate == 0.0)
+            {
+                return gen;
+            }
+            switch (errorType)
+            {
+                case "Bad value":
+                    return new WrongTypeErrorGenerator(gen, rate);
+                case "Additional field":
+                    return new AdditionalFieldErrorGenerator(gen, rate);
+                case "Missing field":
+                    return new MissingFieldErrorGenerator(gen, rate);
+                default:
+                    return gen;
+            }
+
+        }
+
+
+
     }
 }

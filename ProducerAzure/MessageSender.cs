@@ -16,7 +16,7 @@ namespace ProducerAzure
 
         public static void ProduceAndSend(string configUUID, FullConfig producerConfig, string host_addr, CustomLogger log)
         {
-            Producer producer = new Producer(producerConfig.records_count, producerConfig.fields);
+            Producer producer = new Producer(producerConfig.records_count, producerConfig.fields, producerConfig.error_rate);
 
             // Generate and Send Data Records
             host_addr = host_addr ?? LOCAL_HOST;
